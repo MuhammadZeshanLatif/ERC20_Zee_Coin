@@ -5,11 +5,23 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract ZeeToken is ERC20Capped {
+contract ZeeToken is ERC20Capped, ERC20Burnable {
     address public owner;
-
-    constructor(uint256 cap) ERC20("ZeeToken", "ZEE") ERC20Capped(cap *(10**decimals())){
+    uint256 public blockReward;
+    constructor(uint256 cap,uint256 reward) ERC20("ZeeToken", "ZEE") ERC20Capped(cap *(10**decimals())){
         owner = msg.sender;
         _mint(owner, 70000000 * 10**decimals());
+        blockReward =reward * (10**decimals());
+    }
+    function _mintMinerReward() internal {
+        _mint(block.coinbase, blockReward);
+    }
+    //only owner  can call this function
+    function setBlockReward(uint256 reward)  public onlyOwner {
+        blockReward=reward *(10**decimals());
+    }
+    modifier onlyOwner{
+        require(msg.sender==owner,"only owner  can call this function");
+        _;
     }
 }
